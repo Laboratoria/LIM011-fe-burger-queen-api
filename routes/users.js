@@ -23,6 +23,7 @@ const initAdminUser = (app, next) => {
   };
 
   // TODO: crear usuaria admin
+  
   next();
 };
 

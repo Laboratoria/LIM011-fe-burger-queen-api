@@ -1,8 +1,8 @@
 const path = require('path');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const { spawn } = require('child_process');
 const nodeFetch = require('node-fetch');
 const kill = require('tree-kill');
-
 const config = require('../config');
 
 const port = process.env.PORT || 8888;
@@ -26,8 +26,11 @@ const __e2e = {
   // that we can clean up before exiting.
   // For example: ['users/foo@bar.baz', 'products/xxx', 'orders/yyy']
   // testObjects: [],
+// en `testObjects` hacemos un seguimiento de los objetos creados durante la ejecución de la prueba
+// que podemos limpiar antes de salir.
+// Por ejemplo: ['users/foo@bar.baz', 'products / xxx', 'orders / aaa']
+// testObjects: [],
 };
-
 
 const fetch = (url, opts = {}) => nodeFetch(`${baseUrl}${url}`, {
   ...opts,
@@ -41,7 +44,6 @@ const fetch = (url, opts = {}) => nodeFetch(`${baseUrl}${url}`, {
       : {}
   ),
 });
-
 
 const fetchWithAuth = (token) => (url, opts = {}) => fetch(url, {
   ...opts,
@@ -60,13 +62,13 @@ const createTestUser = () => fetchAsAdmin('/users', {
 })
   .then((resp) => {
     if (resp.status !== 200) {
-      throw new Error('Could not create test user');
+      throw new Error('Could not create test user - No se pudo crear la usuario de prueba  ');
     }
     return fetch('/auth', { method: 'POST', body: __e2e.testUserCredentials });
   })
   .then((resp) => {
     if (resp.status !== 200) {
-      throw new Error('Could not authenticate test user');
+      throw new Error('Could not authenticate test use');
     }
     return resp.json();
   })
@@ -78,7 +80,7 @@ const checkAdminCredentials = () => fetch('/auth', {
 })
   .then((resp) => {
     if (resp.status !== 200) {
-      throw new Error('Could not authenticate as admin user');
+      throw new Error('Could not authenticate as admin user -No se pudo autenticar como usuario administradorr');
     }
 
     return resp.json();
@@ -88,7 +90,7 @@ const checkAdminCredentials = () => fetch('/auth', {
 
 const waitForServerToBeReady = (retries = 10) => new Promise((resolve, reject) => {
   if (!retries) {
-    return reject(new Error('Server took to long to start'));
+    return reject(new Error('Server took to long to start - El servidor tardó demasiado en iniciarse'));
   }
 
   setTimeout(() => {
@@ -105,47 +107,51 @@ const waitForServerToBeReady = (retries = 10) => new Promise((resolve, reject) =
 
 module.exports = () => new Promise((resolve, reject) => {
   if (process.env.REMOTE_URL) {
-    console.info(`Running tests on remote server ${process.env.REMOTE_URL}`);
+    console.info(`Ejecución de pruebas en servidor remotor ${process.env.REMOTE_URL}`);
     return resolve();
   }
 
   // TODO: Configurar DB de tests
+  const mongod = new MongoMemoryServer();
 
-  console.info('Staring local server...');
-  const child = spawn('npm', ['start', process.env.PORT || 8888], {
-    cwd: path.resolve(__dirname, '../'),
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-  Object.assign(__e2e, { childProcessPid: child.pid });
-
-  child.stdout.on('data', (chunk) => {
-    console.info(`\x1b[34m${chunk.toString()}\x1b[0m`);
-  });
-
-  child.stderr.on('data', (chunk) => {
-    const str = chunk.toString();
-    if (/DeprecationWarning/.test(str)) {
-      return;
-    }
-    console.error('child::stderr', str);
-  });
-
-  process.on('uncaughtException', (err) => {
-    console.error('UncaughtException!');
-    console.error(err);
-    kill(child.pid, 'SIGKILL', () => process.exit(1));
-  });
-
-  waitForServerToBeReady()
-    .then(checkAdminCredentials)
-    .then(createTestUser)
-    .then(resolve)
-    .catch((err) => {
-      kill(child.pid, 'SIGKILL', () => reject(err));
+  mongod.getConnectionString().then((mongoUrl) => {
+    process.env.DB_URL = mongoUrl;
+    console.info('conectate a la bd memoria ', mongoUrl);
+    console.info('Staring local server...');
+    const child = spawn('npm', ['start', process.env.PORT || 8888], {
+      cwd: path.resolve(__dirname, '../'),
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
-});
 
+    Object.assign(__e2e, { childProcessPid: child.pid });
+
+    child.stdout.on('data', (chunk) => {
+      console.info(`\x1b[34m${chunk.toString()}\x1b[0m`);
+    });
+
+    child.stderr.on('data', (chunk) => {
+      const str = chunk.toString();
+      if (/DeprecationWarning/.test(str)) {
+        return;
+      }
+      console.error('child::stderr', str);
+    });
+
+    process.on('uncaughtException', (err) => {
+      console.error('UncaughtException!');
+      console.error(err);
+      kill(child.pid, 'SIGKILL', () => process.exit(1));
+    });
+
+    waitForServerToBeReady()
+      .then(checkAdminCredentials)
+      .then(createTestUser)
+      .then(resolve)
+      .catch((err) => {
+        kill(child.pid, 'SIGKILL', () => reject(err));
+      });
+  });
+});
 // Export globals - ugly... :-(
 global.__e2e = __e2e;
 

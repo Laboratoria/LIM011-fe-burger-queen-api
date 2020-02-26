@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+const db = require('../connection');
 
-const { secret } = config;
+const { dbUrl, secret } = config;
 
 /** @module auth */
 module.exports = (app, nextMain) => {
@@ -19,9 +20,13 @@ module.exports = (app, nextMain) => {
    */
   app.post('/auth', (req, resp, next) => {
     const { email, password } = req.body;
+    console.log(req.body);
 
     if (!email || !password) {
       return next(400);
+    }
+    if (email === req.body.email || password === req.body.email) {
+      return next(200);
     }
 
     // TODO: autenticar a la usuarix

@@ -1,31 +1,38 @@
 const express = require('express');
-const mongoClient = require('mongodb').MongoClient;
+// const mongoClient = require('mongodb').MongoClient;
+const connectionMongoDB = require('./connection');
 const config = require('./config');
 const authMiddleware = require('./middleware/auth');
 const errorHandler = require('./middleware/error');
 const routes = require('./routes');
 const pkg = require('./package.json');
 
-
 const { port, dbUrl, secret } = config;
 const app = express();
 
 
+const init = async () => {
+  connectionMongoDB(dbUrl);
+  app.set('config', config);
+  app.set('pkg', pkg);
+};
+
+init();
+/*
 mongoClient.connect(dbUrl, { useUnifiedTopology: true }, (err, db) => {
-  console.log(db);
-  console.log('conexion satisfactora');
+  if (err) {
+    console.log(`Database error: ${err}`);
+  } else {
+    console.log('Conexión exitosa de la base de datos');
+  }
 });
+*/
 
-// TODO: Conección a la BD en mogodb
-
-app.set('config', config);
-app.set('pkg', pkg);
 
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(authMiddleware(secret));
-// CONECCION
 
 // Registrar rutas
 routes(app, (err) => {
