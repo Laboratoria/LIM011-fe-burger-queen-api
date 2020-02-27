@@ -1,5 +1,9 @@
 const bcrypt = require('bcrypt');
-const db = require('../connection');
+const config = require('../config');
+
+const { dbUrl } = config;
+const database = require('../connection');
+
 
 const {
   requireAuth,
@@ -11,7 +15,7 @@ const {
 } = require('../controller/users');
 
 
-const initAdminUser = (app, next) => {
+const initAdminUser = async (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
   if (!adminEmail || !adminPassword) {
     return next();
@@ -22,17 +26,14 @@ const initAdminUser = (app, next) => {
     password: bcrypt.hashSync(adminPassword, 10),
     roles: { admin: true },
   };
-
   // TODO: crear usuaria admin
-  db()
-    .then((db) => {
-      const adminExist = db.collection('users').findOne({ email: adminEmail });
-      if (!adminExist) {
-        db.collection('users').insertOne(adminUser);
-        return next();
-      }
-      return next();
-    });
+  const db = await database(dbUrl);
+  const userCollection = await db.collection('user');
+  const admin = await userCollection.insertOne(adminUser);
+  console.log(admin);
+  /* database.collection('user').insertOne({ adminUser }); */
+
+  next();
 };
 
 
