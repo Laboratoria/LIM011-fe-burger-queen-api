@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const db = require('../connection');
 
 const {
   requireAuth,
@@ -23,8 +24,15 @@ const initAdminUser = (app, next) => {
   };
 
   // TODO: crear usuaria admin
-  
-  next();
+  db()
+    .then((db) => {
+      const adminExist = db.collection('users').findOne({ email: adminEmail });
+      if (!adminExist) {
+        db.collection('users').insertOne(adminUser);
+        return next();
+      }
+      return next();
+    });
 };
 
 

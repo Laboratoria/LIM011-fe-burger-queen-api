@@ -17,17 +17,6 @@ const init = async () => {
   app.set('pkg', pkg);
 };
 
-init();
-/*
-mongoClient.connect(dbUrl, { useUnifiedTopology: true }, (err, db) => {
-  if (err) {
-    console.log(`Database error: ${err}`);
-  } else {
-    console.log('Conexión exitosa de la base de datos');
-  }
-});
-*/
-
 
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
@@ -46,3 +35,5 @@ routes(app, (err) => {
     console.info(`App listening on port ${port}`);
   });
 });
+// INICIALIZARRR
+init();
