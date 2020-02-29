@@ -19,19 +19,25 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(authMiddleware(secret));
 
-// Registrar rutas
-routes(app, (err) => {
-  if (err) {
-    throw err;
-  }
+const init = () => {
+  connectionMongoDB(dbUrl)
+    .then(() => {
+      console.log('conectando mongo');
+      // Registrar rutas
+      routes(app, (err) => {
+        if (err) {
+          throw err;
+        }
+        app.use(errorHandler);
+        app.listen(port, () => {
+          console.info(`App listening on port ${port}`);
+        });
+      });
+    });
+  console.log('Connected successfully to server');
+};
 
-  app.use(errorHandler);
-
-  app.listen(port, () => {
-    console.info(`App listening on port ${port}`);
-  });
-});
-
+init();
 
 // TODO: Conección a la BD en mogodb
 
@@ -62,12 +68,3 @@ mongoClient.connect(dbUrl, { useUnifiedTopology: true }, (err, db) => {
     console.log('Connected successfully to server');
     db.close();
   }); */
-
-// Con async y await
-
-const init = async () => {
-  connectionMongoDB(dbUrl);
-  console.log('Connected successfully to server');
-};
-
-init();

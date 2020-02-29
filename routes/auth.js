@@ -1,8 +1,14 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const config = require('../config');
-const db = require('../connection');
 
-const { dbUrl, secret } = config;
+const { dbUrl } = config;
+const database = require('../connection');
+
+// console.log(db);
+
+
+const { secret } = config;
 
 /** @module auth */
 module.exports = (app, nextMain) => {
@@ -18,19 +24,33 @@ module.exports = (app, nextMain) => {
    * @code {400} si no se proveen `email` o `password` o ninguno de los dos
    * @auth No requiere autenticación
    */
-  app.post('/auth', (req, resp, next) => {
+  app.post('/auth', async (req, resp, next) => {
     const { email, password } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
 
     if (!email || !password) {
       return next(400);
     }
-    if (email === req.body.email || password === req.body.email) {
-      return next(200);
-    }
 
     // TODO: autenticar a la usuarix
-    next();
+    const db = await database(dbUrl);
+    const checkUser = await db.collection('users').findOne({ email });
+    if (!checkUser) {
+      console.log('no existe el usuario registrado');
+      return next(404);
+    }
+    const comparePasswords = await bcrypt.compare(password, checkUser.password);
+    /* console.log(password);
+    console.log(checkUser.password); */
+    if (!comparePasswords) {
+      return next(404);
+    }
+    console.log('token(200) :)');
+    const token = jwt.sign({ id: checkUser._id }, secret, { expiresIn: '3h' });
+
+    console.log(token);
+    return resp.send({ token });
+    // next();
   });
 
   return nextMain();

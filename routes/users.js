@@ -4,6 +4,7 @@ const config = require('../config');
 const { dbUrl } = config;
 const database = require('../connection');
 
+// console.log(database);
 
 const {
   requireAuth,
@@ -26,14 +27,19 @@ const initAdminUser = async (app, next) => {
     password: bcrypt.hashSync(adminPassword, 10),
     roles: { admin: true },
   };
+
   // TODO: crear usuaria admin
   const db = await database(dbUrl);
-  const userCollection = await db.collection('user');
-  const admin = await userCollection.insertOne(adminUser);
-  console.log(admin);
-  /* database.collection('user').insertOne({ adminUser }); */
-
-  next();
+  const usersCollection = await db.collection('users');
+  const checkAdmin = await db.collection('users').findOne({ email: adminEmail });
+  // retorna un boolean
+  // console.log(checkAdmin);
+  // console.log('chequeando admin', checkAdmin === false){return 'a'});
+  // console.log(checkAdmin);
+  if (!checkAdmin) {
+    await usersCollection.insertOne(adminUser);
+  }
+  return next();
 };
 
 
@@ -172,6 +178,6 @@ module.exports = (app, next) => {
    */
   app.delete('/users/:uid', requireAuth, (req, resp, next) => {
   });
-
+  console.log('llegue al next final');
   initAdminUser(app, next);
 };
