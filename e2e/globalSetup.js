@@ -49,7 +49,7 @@ const fetchWithAuth = (token) => (url, opts = {}) => fetch(url, {
   ...opts,
   headers: {
     ...opts.headers,
-    authorization: `Bearer ${token}`,
+    authorization: `Bearer(PORTADORA) ${token}`,
   },
 });
 
