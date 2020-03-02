@@ -34,8 +34,6 @@ const initAdminUser = async (app, next) => {
   const checkAdmin = await db.collection('users').findOne({ email: adminEmail });
   // retorna un boolean
   // console.log(checkAdmin);
-  // console.log('chequeando admin', checkAdmin === false){return 'a'});
-  // console.log(checkAdmin);
   if (!checkAdmin) {
     await usersCollection.insertOne(adminUser);
   }
@@ -111,6 +109,7 @@ module.exports = (app, next) => {
    * @code {404} si la usuaria solicitada no existe
    */
   app.get('/users/:uid', requireAuth, (req, resp) => {
+    next();
   });
 
   /**
@@ -133,6 +132,7 @@ module.exports = (app, next) => {
    * @code {403} si ya existe usuaria con ese `email`
    */
   app.post('/users', requireAdmin, (req, resp, next) => {
+    next();
   });
 
   /**
@@ -158,6 +158,7 @@ module.exports = (app, next) => {
    * @code {404} si la usuaria solicitada no existe
    */
   app.put('/users/:uid', requireAuth, (req, resp, next) => {
+    next();
   });
 
   /**
@@ -177,6 +178,7 @@ module.exports = (app, next) => {
    * @code {404} si la usuaria solicitada no existe
    */
   app.delete('/users/:uid', requireAuth, (req, resp, next) => {
+    next();
   });
   console.log('llegue al next final');
   initAdminUser(app, next);

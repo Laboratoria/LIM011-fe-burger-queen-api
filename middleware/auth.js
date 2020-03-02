@@ -1,10 +1,13 @@
 const jwt = require('jsonwebtoken');
+const ObjectId = require('mongodb').ObjectID;
+const config = require('../config');
+
+const { dbUrl } = config;
+const database = require('../connection');
 
 module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;
-  console.log('consolenaod objeto authorization', req.headers.authorization);
-  console.log('jojojo', authorization);
-  
+
   if (!authorization) {
     return next();
   }
@@ -15,23 +18,42 @@ module.exports = (secret) => (req, resp, next) => {
     return next();
   }
 
-  jwt.verify(token, secret, (err, decodedToken) => {
+  jwt.verify(token, secret, async (err, decodedToken) => {
     if (err) {
       return next(403);
     }
     // TODO: Verificar identidad del usuario usando `decodeToken.uid`
-    console.log('estoy en el middle');
+    const db = await database(dbUrl);
+    /* const checkUser = await db.collection('users').findOne({ email: adminEmail });
+    console.log('middle buscando', checkUser);
+    console.log('viendo tipo', typeof checkUser._id);
+    console.log('viendo tipo2', checkUser._id);
+    console.log(decodedToken);
+    const decode = decodedToken.uid;
+    console.log('decode', decode);
+    console.log('decode2 ', typeof decode);
+    console.log('decode3 ', { _id: decode }); */
+    const decode = decodedToken.uid;
+    const user = await db.collection('users').findOne({ _id: ObjectId(decode) });
+    console.log('user', user);
+    req.headers.user = user;
+    console.log(req.headers.user);
+    console.log(req.headers.user.roles.admin);
     next();
+    // decoded = jwt.decode(token, { complete: true });
   });
 };
+
+
 module.exports.isAuthenticated = (req) => (
   // TODO: decidir por la informacion del request si la usuaria esta autenticada
-  false
+  req.headers.user
 );
+
 
 module.exports.isAdmin = (req) => (
   // TODO: decidir por la informacion del request si la usuaria es admin
-  false
+  req.headers.user.roles.admin
 );
 
 
