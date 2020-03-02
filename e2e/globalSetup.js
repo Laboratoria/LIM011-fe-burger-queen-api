@@ -1,8 +1,9 @@
 const path = require('path');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const { spawn } = require('child_process');
 const nodeFetch = require('node-fetch');
 const kill = require('tree-kill');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
 const config = require('../config');
 
 const port = process.env.PORT || 8888;
@@ -26,11 +27,8 @@ const __e2e = {
   // that we can clean up before exiting.
   // For example: ['users/foo@bar.baz', 'products/xxx', 'orders/yyy']
   // testObjects: [],
-// en `testObjects` hacemos un seguimiento de los objetos creados durante la ejecución de la prueba
-// que podemos limpiar antes de salir.
-// Por ejemplo: ['users/foo@bar.baz', 'products / xxx', 'orders / aaa']
-// testObjects: [],
 };
+
 
 const fetch = (url, opts = {}) => nodeFetch(`${baseUrl}${url}`, {
   ...opts,
@@ -45,11 +43,12 @@ const fetch = (url, opts = {}) => nodeFetch(`${baseUrl}${url}`, {
   ),
 });
 
+
 const fetchWithAuth = (token) => (url, opts = {}) => fetch(url, {
   ...opts,
   headers: {
     ...opts.headers,
-    authorization: `Bearer(PORTADORA) ${token}`,
+    authorization: `Bearer ${token}`,
   },
 });
 
@@ -62,13 +61,13 @@ const createTestUser = () => fetchAsAdmin('/users', {
 })
   .then((resp) => {
     if (resp.status !== 200) {
-      throw new Error('Could not create test user - No se pudo crear la usuario de prueba  ');
+      throw new Error('Could not create test user');
     }
     return fetch('/auth', { method: 'POST', body: __e2e.testUserCredentials });
   })
   .then((resp) => {
     if (resp.status !== 200) {
-      throw new Error('Could not authenticate test use');
+      throw new Error('Could not authenticate test user');
     }
     return resp.json();
   })
@@ -80,7 +79,7 @@ const checkAdminCredentials = () => fetch('/auth', {
 })
   .then((resp) => {
     if (resp.status !== 200) {
-      throw new Error('Could not authenticate as admin user -No se pudo autenticar como usuario administradorr');
+      throw new Error('Could not authenticate as admin user');
     }
 
     return resp.json();
@@ -90,7 +89,7 @@ const checkAdminCredentials = () => fetch('/auth', {
 
 const waitForServerToBeReady = (retries = 10) => new Promise((resolve, reject) => {
   if (!retries) {
-    return reject(new Error('Server took to long to start - El servidor tardó demasiado en iniciarse'));
+    return reject(new Error('Server took to long to start'));
   }
 
   setTimeout(() => {
@@ -107,21 +106,22 @@ const waitForServerToBeReady = (retries = 10) => new Promise((resolve, reject) =
 
 module.exports = () => new Promise((resolve, reject) => {
   if (process.env.REMOTE_URL) {
-    console.info(`Ejecución de pruebas en servidor remotor ${process.env.REMOTE_URL}`);
+    console.info(`Running tests on remote server ${process.env.REMOTE_URL}`);
     return resolve();
   }
 
   // TODO: Configurar DB de tests
-  const mongod = new MongoMemoryServer();
 
-  mongod.getConnectionString().then((mongoUrl) => {
-    process.env.DB_URL = mongoUrl;
-    console.info('conectate a la bd memoria ', mongoUrl);
+  const mongod = new MongoMemoryServer();
+  mongod.getConnectionString().then((urL) => {
+    process.env.DB_URL = urL;
+    console.info(urL);
     console.info('Staring local server...');
     const child = spawn('npm', ['start', process.env.PORT || 8888], {
       cwd: path.resolve(__dirname, '../'),
       stdio: ['ignore', 'pipe', 'pipe'],
     });
+
 
     Object.assign(__e2e, { childProcessPid: child.pid });
 
@@ -152,6 +152,7 @@ module.exports = () => new Promise((resolve, reject) => {
       });
   });
 });
+
 // Export globals - ugly... :-(
 global.__e2e = __e2e;
 

@@ -28,6 +28,7 @@ module.exports = (app, nextMain) => {
    * @code {401} si no hay cabecera de autenticación
    */
   app.get('/products', requireAuth, (req, resp, next) => {
+    next();
   });
 
   /**
@@ -48,6 +49,7 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.get('/products/:productId', requireAuth, (req, resp, next) => {
+    next();
   });
 
   /**
@@ -73,6 +75,7 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.post('/products', requireAdmin, (req, resp, next) => {
+    next();
   });
 
 
@@ -100,6 +103,7 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.put('/products/:productId', requireAdmin, (req, resp, next) => {
+    next();
   });
 
   /**
@@ -121,7 +125,9 @@ module.exports = (app, nextMain) => {
    * @code {404} si el producto con `productId` indicado no existe
    */
   app.delete('/products/:productId', requireAdmin, (req, resp, next) => {
+    console.log('products delete route');
+    next();
   });
-
+  console.log('products route');
   nextMain();
 };

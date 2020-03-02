@@ -13,31 +13,23 @@ const app = express();
 
 app.set('config', config);
 app.set('pkg', pkg);
-
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(authMiddleware(secret));
 
-const init = () => {
-  connectionMongoDB(dbUrl)
-    .then(() => {
-      console.log('conectando mongo');
-      // Registrar rutas
-      routes(app, (err) => {
-        if (err) {
-          throw err;
-        }
-        app.use(errorHandler);
-        app.listen(port, () => {
-          console.info(`App listening on port ${port}`);
-        });
-      });
-    });
-  console.log('Connected successfully to server');
-};
+// Registrar rutas
+routes(app, (err) => {
+  if (err) {
+    throw err;
+  }
 
-init();
+  app.use(errorHandler);
+
+  app.listen(port, () => {
+    console.info(`App listening on port ${port}`);
+  });
+});
 
 // TODO: Conección a la BD en mogodb
 
@@ -68,3 +60,12 @@ mongoClient.connect(dbUrl, { useUnifiedTopology: true }, (err, db) => {
     console.log('Connected successfully to server');
     db.close();
   }); */
+
+// Con async y await
+
+const init = async () => {
+  connectionMongoDB(dbUrl);
+  console.log('Connected successfully to server');
+};
+
+init();
