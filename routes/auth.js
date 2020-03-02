@@ -46,10 +46,16 @@ module.exports = (app, nextMain) => {
       return next(404);
     }
     console.log('token(200) :)');
+
+    // CREANDO Y ASIGNANDO EL TOKEN A LOS USUARIOS.
     const token = jwt.sign({ id: checkUser._id }, secret, { expiresIn: '3h' });
 
-    console.log(token);
+    console.log('token enviado', (token));
+
+    // console.log(resp.send(token).json());
+    //  console.log(resp.send({ token }));
     return resp.send({ token });
+
     // next();
   });
 
