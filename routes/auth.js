@@ -26,8 +26,7 @@ module.exports = (app, nextMain) => {
    */
   app.post('/auth', async (req, resp, next) => {
     const { email, password } = req.body;
-    // console.log(req.body);
-
+    
     if (!email || !password) {
       return next(400);
     }
@@ -45,11 +44,11 @@ module.exports = (app, nextMain) => {
     if (!comparePasswords) {
       return next(404);
     }
-    console.log('token(200) :)');
     const token = jwt.sign({ uid: checkUser._id }, secret, { expiresIn: '3h' });
     console.log('auth', checkUser);
     console.log('auth', token);
-    return resp.send({ token });
+    resp.send({ token });
+    console.log('token(200) :)');
     // next();
   });
 
