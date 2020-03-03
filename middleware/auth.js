@@ -33,7 +33,9 @@ module.exports = (secret) => (req, resp, next) => {
     console.log('decode', decode);
     console.log('decode2 ', typeof decode);
     console.log('decode3 ', { _id: decode }); */
+    console.log('decode', decodedToken);
     const decode = decodedToken.uid;
+    console.log('decode.........', decode);
     const user = await db.collection('users').findOne({ _id: ObjectId(decode) });
     console.log('user', user);
     req.headers.user = user;

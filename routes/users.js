@@ -13,6 +13,7 @@ const {
 
 const {
   getUsers,
+  createUsers,
 } = require('../controller/users');
 
 
@@ -31,9 +32,9 @@ const initAdminUser = async (app, next) => {
   // TODO: crear usuaria admin
   const db = await database(dbUrl);
   const usersCollection = await db.collection('users');
-  const checkAdmin = await db.collection('users').findOne({ email: adminEmail });
+  const checkAdmin = await usersCollection.findOne({ email: adminEmail });
   // retorna un boolean
-  // console.log(checkAdmin);
+  console.log('CHECKEANDO ADMIN', checkAdmin);
   if (!checkAdmin) {
     await usersCollection.insertOne(adminUser);
   }
@@ -69,6 +70,7 @@ const initAdminUser = async (app, next) => {
 
 /** @module users */
 module.exports = (app, next) => {
+  console.log(app);
   /**
    * @name GET /users
    * @description Lista usuarias
@@ -108,9 +110,7 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.get('/users/:uid', requireAuth, (req, resp) => {
-    next();
-  });
+  app.get('/users/:uid', requireAuth);
 
   /**
    * @name POST /users
@@ -131,9 +131,7 @@ module.exports = (app, next) => {
    * @code {401} si no hay cabecera de autenticación
    * @code {403} si ya existe usuaria con ese `email`
    */
-  app.post('/users', requireAdmin, (req, resp, next) => {
-    next();
-  });
+  app.post('/users', requireAdmin, createUsers);
 
   /**
    * @name PUT /users
