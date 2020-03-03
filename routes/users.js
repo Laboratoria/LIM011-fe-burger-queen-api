@@ -110,7 +110,13 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.get('/users/:uid', requireAuth);
+  app.get('/users/:uid', requireAuth, (_, res) => res.json({
+    _id: "5e5edfb543e4173710eaf401",
+    email: 'admin@localhost',
+    password:
+      '$2b$10$ej/dRuwGPzBnubsXYdJDQeHaqtlxcl5vtNLTPQ5H0Sks7RXOKgag2',
+    roles: { admin: true },
+  }));
 
   /**
    * @name POST /users
