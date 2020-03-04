@@ -11,10 +11,34 @@ module.exports = {
   getUsers: (req, res, next) => {
     next();
   },
+  getUserById: async (req, resp, next) => {
+    // console.log('q hay aqui por dios xd', req.params.uid);
+    const { uid } = req.params;
+    let query;
+    if (isValidEmail(uid)) {
+      query = { email: uid };
+    } else {
+      query = { _id: ObjectId(uid) };
+    }
+    console.log('wiii', uid);
+
+    const db = await database(dbUrl);
+    // const usersCollection = await db.collection('users');
+    const checkUser = await db.collection('users').findOne(query);
+    if (!checkUser) {
+      return next(404);
+    }
+    console.log('buscando', checkUser);
+    resp.send({
+      _id: checkUser._id,
+      email: checkUser.email,
+      roles: checkUser.roles,
+    });
+  },
   createUsers: async (req, resp, next) => {
     const { email, password, roles } = req.body;
-    console.log('a ver xd', req.body);
-    console.log('q hay aqui', email, password, roles);
+    // console.log('a ver xd', req.body);
+    // console.log('q hay aqui', email, password, roles);
     if (!email || !password) {
       // console.log('falta email y password');
       return next(400);
@@ -49,11 +73,17 @@ module.exports = {
     // console.log('nuevo usuario', newUserId);
     // resp.status(200).send(newUser);
     const user = await db.collection('users').findOne({ _id: ObjectId(newUserId.insertedId) });
-    console.log('entendiendo', user);
+    // console.log('entendiendo', user);
     resp.send({
       _id: user._id,
       email: user.email,
       roles: user.roles,
     });
+  },
+  updateUser: async (req, resp, next) => {
+    next();
+  },
+  deleteUser: async (req, resp, next) => {
+    next();
   },
 };

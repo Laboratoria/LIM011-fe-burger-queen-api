@@ -4,9 +4,8 @@ const config = require('../config');
 const { dbUrl } = config;
 const database = require('../connection');
 
-// console.log(database);
-
 const {
+  isUserOrAdmin,
   requireAuth,
   requireAdmin,
 } = require('../middleware/auth');
@@ -14,6 +13,9 @@ const {
 const {
   getUsers,
   createUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
 } = require('../controller/users');
 
 
@@ -34,7 +36,7 @@ const initAdminUser = async (app, next) => {
   const usersCollection = await db.collection('users');
   const checkAdmin = await usersCollection.findOne({ email: adminEmail });
   // retorna un boolean
-  console.log('CHECKEANDO ADMIN', checkAdmin);
+  // console.log('CHECKEANDO ADMIN', checkAdmin);
   if (!checkAdmin) {
     await usersCollection.insertOne(adminUser);
   }
@@ -70,7 +72,7 @@ const initAdminUser = async (app, next) => {
 
 /** @module users */
 module.exports = (app, next) => {
-  console.log(app);
+  // console.log(app);
   /**
    * @name GET /users
    * @description Lista usuarias
@@ -110,13 +112,15 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.get('/users/:uid', requireAuth, (_, res) => res.json({
+  /* app.get('/users/:uid', requireAuth, requireAdmin, (_, res) => res.json({
     _id: "5e5edfb543e4173710eaf401",
     email: 'admin@localhost',
     password:
       '$2b$10$ej/dRuwGPzBnubsXYdJDQeHaqtlxcl5vtNLTPQ5H0Sks7RXOKgag2',
     roles: { admin: true },
-  }));
+  })); */
+
+  app.get('/users/:uid', requireAuth, isUserOrAdmin, getUserById);
 
   /**
    * @name POST /users
@@ -161,9 +165,7 @@ module.exports = (app, next) => {
    * @code {403} una usuaria no admin intenta de modificar sus `roles`
    * @code {404} si la usuaria solicitada no existe
    */
-  app.put('/users/:uid', requireAuth, (req, resp, next) => {
-    next();
-  });
+  app.put('/users/:uid', requireAuth, isUserOrAdmin, updateUser);
 
   /**
    * @name DELETE /users
@@ -181,9 +183,7 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.delete('/users/:uid', requireAuth, (req, resp, next) => {
-    next();
-  });
+  app.delete('/users/:uid', requireAuth, deleteUser);
   console.log('llegue al next final');
   initAdminUser(app, next);
 };
