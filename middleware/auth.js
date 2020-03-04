@@ -33,14 +33,14 @@ module.exports = (secret) => (req, resp, next) => {
     console.log('decode', decode);
     console.log('decode2 ', typeof decode);
     console.log('decode3 ', { _id: decode }); */
-    console.log('decode', decodedToken);
+    // console.log('decode', decodedToken);
     const decode = decodedToken.uid;
-    console.log('decode.........', decode);
+    // console.log('decode.........', decode);
     const user = await db.collection('users').findOne({ _id: ObjectId(decode) });
-    console.log('user', user);
+    // console.log('user', user);
     req.headers.user = user;
-    console.log(req.headers.user);
-    console.log(req.headers.user.roles.admin);
+    // console.log(req.headers.user);
+    // console.log(req.headers.user.roles.admin);
     next();
     // decoded = jwt.decode(token, { complete: true });
   });
@@ -58,13 +58,21 @@ module.exports.isAdmin = (req) => (
   req.headers.user.roles.admin
 );
 
+module.exports.isUserOrAdmin = (req, resp, next) => (
+  // console.log('deadpool', typeof req.headers.user._id)
+  // console.log('deadpool2', ObjectId(req.params.uid))
+  (module.exports.isAdmin(req)
+  || (module.exports.isAuthenticated(req).email === req.params.uid
+  || module.exports.isAuthenticated(req)._id.toString() === (req.params.uid)))
+    ? next()
+    : next(403)
+);
 
 module.exports.requireAuth = (req, resp, next) => (
   (!module.exports.isAuthenticated(req))
     ? next(401)
     : next()
 );
-
 
 module.exports.requireAdmin = (req, resp, next) => (
   // eslint-disable-next-line no-nested-ternary
