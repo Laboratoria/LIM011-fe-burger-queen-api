@@ -11,20 +11,17 @@ module.exports = (secret) => (req, resp, next) => {
   if (!authorization) {
     return next();
   }
-
   const [type, token] = authorization.split(' ');
-
   if (type.toLowerCase() !== 'bearer') {
     return next();
   }
-
   jwt.verify(token, secret, async (err, decodedToken) => {
     if (err) {
       return next(403);
     }
     // TODO: Verificar identidad del usuario usando `decodeToken.uid`
     const db = await database(dbUrl);
-    /* const checkUser = await db.collection('users').findOne({ email: adminEmail });
+    const checkUser = await db.collection('users').findOne();
     console.log('middle buscando', checkUser);
     console.log('viendo tipo', typeof checkUser._id);
     console.log('viendo tipo2', checkUser._id);
@@ -32,9 +29,8 @@ module.exports = (secret) => (req, resp, next) => {
     const decode = decodedToken.uid;
     console.log('decode', decode);
     console.log('decode2 ', typeof decode);
-    console.log('decode3 ', { _id: decode }); */
+    console.log('decode3 ', { _id: decode });
     // console.log('decode', decodedToken);
-    const decode = decodedToken.uid;
     // console.log('decode.........', decode);
     const user = await db.collection('users').findOne({ _id: ObjectId(decode) });
     // console.log('user', user);
@@ -61,12 +57,13 @@ module.exports.isAdmin = (req) => (
 module.exports.isUserOrAdmin = (req, resp, next) => (
   // console.log('deadpool', typeof req.headers.user._id)
   // console.log('deadpool2', ObjectId(req.params.uid))
-  (module.exports.isAdmin(req)
-  || (module.exports.isAuthenticated(req).email === req.params.uid
-  || module.exports.isAuthenticated(req)._id.toString() === (req.params.uid)))
+  ((module.exports.isAdmin(req))
+  || ((module.exports.isAuthenticated(req).email === req.params.uid)
+  || (module.exports.isAuthenticated(req)._id.toString() === (req.params.uid))))
     ? next()
     : next(403)
 );
+
 
 module.exports.requireAuth = (req, resp, next) => (
   (!module.exports.isAuthenticated(req))

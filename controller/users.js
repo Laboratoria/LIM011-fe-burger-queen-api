@@ -2,13 +2,17 @@ const bcrypt = require('bcrypt');
 const ObjectId = require('mongodb').ObjectID;
 const isValidEmail = require('./utils');
 const config = require('../config');
+const { isAdmin } = require('../middleware/auth');
 
 const { dbUrl } = config;
 const database = require('../connection');
 
 
 module.exports = {
-  getUsers: (req, res, next) => {
+  getUsers: async (req, res, next) => {
+    const db = await database(dbUrl);
+    const collectionUsers = await db.collection('users');
+    console.log(collectionUsers);
     next();
   },
   getUserById: async (req, resp, next) => {
@@ -96,17 +100,25 @@ module.exports = {
     if (!user) {
       return next(404);
     }
-
+    if (!isAdmin(req) && roles) {
+      return next(403);
+    }
     if (!(email || password)) {
       return next(400);
     }
     const passwords = bcrypt.hashSync(password, 10);
+    // if (req.body.email) {
+    // user.email = req.body.email;
+    //  }
+    // if (req.body.password) {
+    // user.password = bcrypt.hashSync(req.body.password, 10);
+    // }
     await collectionUsers.updateOne(
       query, {
         $set: {
-          email,
-          password: passwords,
-          roles,
+          email: req.body.email || user.email,
+          password: passwords || user.passwords,
+          roles: user.roles || user.roles,
         },
       },
     );
