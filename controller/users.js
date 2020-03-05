@@ -80,10 +80,60 @@ module.exports = {
       roles: user.roles,
     });
   },
-  updateUser: async (req, resp, next) => {
+  updateUser: async (req, res, next) => {
+    const { uid } = req.params;
+    const { email, password, roles } = req.body;
+    const db = await database(dbUrl);
+    const collectionUsers = (await db.collection('users'));
+
+    let query;
+    if (isValidEmail(uid)) {
+      query = { email: uid };
+    } else {
+      query = { _id: ObjectId(uid) };
+    }
+    const user = await collectionUsers.findOne(query);
+    if (!user) {
+      return next(404);
+    }
+
+    if (!(email || password)) {
+      return next(400);
+    }
+    const passwords = bcrypt.hashSync(password, 10);
+    await collectionUsers.updateOne(
+      query, {
+        $set: {
+          email,
+          password: passwords,
+          roles,
+        },
+      },
+    );
+    const updateUser = await collectionUsers.findOne({ _id: ObjectId(user._id) });
+    console.log('se puede modificar', updateUser);
+    res.send(updateUser);
     next();
   },
   deleteUser: async (req, resp, next) => {
+    const { uid } = req.params;
+    const db = await database(dbUrl);
+    const collectionUsers = (await db.collection('users'));
+    let query;
+    if (isValidEmail(uid)) {
+      query = { email: uid };
+    } else {
+      query = { _id: ObjectId(uid) };
+    }
+    const user = await collectionUsers.findOne(query);
+    console.log(user, 'userrrr');
+    if (!user) {
+      return next(404);
+    }
+
+    await collectionUsers.deleteOne(query);
+    resp.send({ _id: user._id, email: user.email, roles: user.roles });
+
     next();
   },
 };
