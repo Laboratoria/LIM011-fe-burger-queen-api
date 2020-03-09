@@ -10,10 +10,35 @@ const database = require('../connection');
 
 module.exports = {
   getUsers: async (req, res, next) => {
+    // console.log('viendo el req', req);
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const page = parseInt(req.query.page, 10) || 1;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    /* console.log('viendo los limit', limit);
+    console.log('viendo los pages', page);
+    console.log('hola', req.params); */
+    // const startIndex = (page - 1) * 10;
     const db = await database(dbUrl);
-    const collectionUsers = await db.collection('users');
-    console.log(collectionUsers);
-    next();
+    const allUsers = (await db.collection('users').find()
+      .skip(startIndex).limit(limit)
+      .toArray())
+      .map(({ _id, email, roles }) => ({ _id, email, roles }));
+    const numberOfUsers = await db.collection('users').find().count();
+    const numberOfPages = Math.ceil(numberOfUsers / limit);
+    console.log('numero de usuarios', numberOfUsers);
+    console.log('numero de paginas', numberOfPages);
+    console.log('todos los usuarios', allUsers);
+    const linksHeader = {
+      next: `</users?page=${page + 1}&limit=${limit}>; rel="next"`,
+      last: `</users?page=${numberOfPages}&limit=${limit}>; rel="last"`,
+      first: `</users?page=1&limit=${limit}>; rel="first"`,
+      prev: `</users?page=${page > 1 ? page - 1 : 1}&limit=${limit}>; rel="prev"`,
+    };
+    console.log('links', linksHeader);
+    console.log('links|', linksHeader.next);
+    res.set('link', `${linksHeader.first},${linksHeader.last},${linksHeader.prev},${linksHeader.next}`);
+    res.send(allUsers);
   },
   getUserById: async (req, resp, next) => {
     // console.log('q hay aqui por dios xd', req.params.uid);
