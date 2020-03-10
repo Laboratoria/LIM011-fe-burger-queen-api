@@ -3,7 +3,7 @@ const ObjectId = require('mongodb').ObjectID;
 const config = require('../config');
 
 const { dbUrl } = config;
-const database = require('../connection');
+const database = require('../conection/connection');
 
 module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;

@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const config = require('../config');
 
 const { dbUrl } = config;
-const database = require('../connection');
+const database = require('../conection/connection');
 
 const {
   isUserOrAdmin,
@@ -16,7 +16,7 @@ const {
   getUserById,
   updateUser,
   deleteUser,
-} = require('../controller/users');
+} = require('../controller/usersController');
 
 
 const initAdminUser = async (app, next) => {

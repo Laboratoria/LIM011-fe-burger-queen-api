@@ -5,7 +5,7 @@ const config = require('../config');
 const { isAdmin } = require('../middleware/auth');
 
 const { dbUrl } = config;
-const database = require('../connection');
+const database = require('../conection/connection');
 
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
     const limit = parseInt(req.query.limit, 10) || 10;
     const page = parseInt(req.query.page, 10) || 1;
     const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
+    // const endIndex = page * limit;
     /* console.log('viendo los limit', limit);
     console.log('viendo los pages', page);
     console.log('hola', req.params); */
@@ -39,6 +39,7 @@ module.exports = {
     console.log('links|', linksHeader.next);
     res.set('link', `${linksHeader.first},${linksHeader.last},${linksHeader.prev},${linksHeader.next}`);
     res.send(allUsers);
+    next();
   },
   getUserById: async (req, resp, next) => {
     // console.log('q hay aqui por dios xd', req.params.uid);
