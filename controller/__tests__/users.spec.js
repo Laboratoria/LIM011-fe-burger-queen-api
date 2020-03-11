@@ -1,15 +1,25 @@
 
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const {
   createUsers,
 } = require('../../controller/usersController');
-const getDB = require('./globalSetup.spec');
+const db = require('../../conection/connection');
 
-const init = async () => {
-  getDB();
-  console.log('conexxion con memory server');
-};
-init();
-describe('creando usuario', () => {
+describe('createUsers', () => {
+  beforeAll(async () => {
+    const mongod = new MongoMemoryServer();
+    const con = await mongod.getConnectionString();
+    process.env.DB_URL = con;
+    // console.log('qqqq', con);
+    // console.log('conectado');
+  });
+  beforeEach(async () => {
+    await db();
+  });
+  /* afterAll(async () => {
+    await database.close();
+    console.log('cerrado');
+  }); */
   it('deberia crear usuarios', (done) => {
     const user = {
       email: 'tester@test',
