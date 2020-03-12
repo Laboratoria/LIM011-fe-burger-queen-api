@@ -1,26 +1,18 @@
-
-const { MongoMemoryServer } = require('mongodb-memory-server');
+// const ObjectId = require('mongodb').ObjectID;
 const {
   createUsers,
-} = require('../../controller/usersController');
-const db = require('../../conection/connection');
+} = require('../usersController');
+const database = require('../../conection/__mocks__/connection');
 
 describe('createUsers', () => {
   beforeAll(async () => {
-    const mongod = new MongoMemoryServer();
-    const con = await mongod.getConnectionString();
-    process.env.DB_URL = con;
-    // console.log('qqqq', con);
-    // console.log('conectado');
+    await database();
   });
-  beforeEach(async () => {
-    await db();
+  afterAll(async () => {
+    await (await database()).collection('users').deleteMany({});
+    await database().close();
   });
-  /* afterAll(async () => {
-    await database.close();
-    console.log('cerrado');
-  }); */
-  it('deberia crear usuarios', (done) => {
+  it('Debería crear un nuevo usuario', async () => {
     const user = {
       email: 'tester@test',
       roles: {
@@ -38,11 +30,13 @@ describe('createUsers', () => {
     };
     const res = {
       send(result) {
+        console.log('wea', result);
         expect(result.email).toStrictEqual(user.email);
-        done();
       },
     };
     const next = (code) => code;
-    createUsers(req, res, next);
+    await createUsers(req, res, next);
+    // console.log('wea', req);
+  //  console.log('wea1', res.send);
   });
 });
