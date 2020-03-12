@@ -6,7 +6,7 @@ const {
 const {
   createProduct,
   getProductId,
-  deleteProduct
+  deleteProduct,
 } = require('../controller/ProductsController');
 /** @module products */
 module.exports = (app, nextMain) => {
