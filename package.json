@@ -8,6 +8,7 @@
   },
   "jest": {
     "verbose": true
+
   },
   "scripts": {
     "pretest": "eslint .",
@@ -16,11 +17,12 @@
     "test:e2e:users": "jest --verbose --testPathPattern e2e/users.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
     "test:e2e:products": "jest --verbose --testPathPattern e2e/products.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
     "test:e2e:orders": "jest --verbose --testPathPattern e2e/orders.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
-    "test:unit": "jest --verbose --testPathIgnorePatterns e2e",
+    "test:unit": "jest --coverage --verbose --testPathIgnorePatterns e2e",
     "test": "npm run test:e2e && npm run test:unit",
     "lint": "eslint .",
     "docs:generate": "jsdoc -c jsdoc.conf --readme README-docs.md",
-    "docs:deploy": "rm -rf docs && npm run docs:generate && gh-pages -d docs"
+    "docs:deploy": "rm -rf docs && npm run docs:generate && gh-pages -d docs",
+    "prueba": "node /home/lizbeth/Documents/LAB-11/LIM011-fe-burger-queen-api/controller/proban.js"
     
   },
   "dependencies": {
