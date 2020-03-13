@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Code coverage report for LIM011-fe-burger-queen-api/controller/utils.js</title>
+    <title>Code coverage report for burger-queen-api/conection/connection.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -16,28 +16,28 @@
 <div class='wrapper'>
   <div class='pad1'>
     <h1>
-      <a href="../../index.html">All files</a> / <a href="index.html">LIM011-fe-burger-queen-api/controller</a> utils.js
+      <a href="../../index.html">All files</a> / <a href="index.html">burger-queen-api/conection</a> connection.js
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">71.43% </span>
+        <span class="strong">75% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>5/7</span>
-      </div>
-      <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
-        <span class="quiet">Branches</span>
-        <span class='fraction'>0/2</span>
+        <span class='fraction'>6/8</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">50% </span>
-        <span class="quiet">Functions</span>
+        <span class="quiet">Branches</span>
         <span class='fraction'>1/2</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">71.43% </span>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>1/1</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">75% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>5/7</span>
+        <span class='fraction'>6/8</span>
       </div>
     </div>
     <p class="quiet">
@@ -62,48 +62,45 @@
 <a name='L14'></a><a href='#L14'>14</a>
 <a name='L15'></a><a href='#L15'>15</a>
 <a name='L16'></a><a href='#L16'>16</a>
-<a name='L17'></a><a href='#L17'>17</a>
-<a name='L18'></a><a href='#L18'>18</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L17'></a><a href='#L17'>17</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
-const isValidEmail = (email) =&gt; {
-  const regex = /^(([^&lt;&gt;()[\]\\.,;:\s@"]+(\.[^&lt;&gt;()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return regex.test(email);
-};
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const mongoClient = require('mongodb').MongoClient;
+const config = require('../config');
 &nbsp;
-const pagination = <span class="fstat-no" title="function not covered" >(n</span>ameOfCollections, page, numberOfPages, limit) =&gt; {
-  const linksHeader = <span class="cstat-no" title="statement not covered" >{</span>
-    next: `&lt;/${nameOfCollections}?page=${page + 1}&amp;limit=${limit}&gt;; rel="next"`,
-    last: `&lt;/${nameOfCollections}?page=${numberOfPages}&amp;limit=${limit}&gt;; rel="last"`,
-    first: `&lt;/${nameOfCollections}?page=1&amp;limit=${limit}&gt;; rel="first"`,
-    prev: `&lt;/${nameOfCollections}?page=${page &gt; 1 ? page - 1 : 1}&amp;limit=${limit}&gt;; rel="prev"`,
-  };
-<span class="cstat-no" title="statement not covered" >  return linksHeader;</span>
-};
+const { dbUrl } = config;
 &nbsp;
-module.exports = { isValidEmail, pagination };
+let db;
+&nbsp;
+module.exports = async () =&gt; {
+  // Conectamos al servidor
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!db) {
+    const client = await mongoClient.connect(dbUrl, { useUnifiedTopology: true });
+<span class="cstat-no" title="statement not covered" >    db = client.db('API-burgerQueen');</span>
+  }
+<span class="cstat-no" title="statement not covered" >  return db;</span>
+  // retornamos la conexión con el nombre de la bd a usar
+};
 &nbsp;</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Fri Mar 13 2020 11:02:29 GMT-0500 (Peru Standard Time)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Fri Mar 13 2020 10:57:48 GMT-0500 (Peru Standard Time)
 </div>
 </div>
 <script src="../../prettify.js"></script>

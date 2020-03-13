@@ -8,25 +8,25 @@ const {
 } = require('../usersController');
 const database = require('../../conection/__mocks__/connection');
 
-describe('CREAR USUARIO', () => {
+describe('createUsers', () => {
   beforeAll(async () => {
     await database();
   });
   afterAll(async () => {
     await (await database()).collection('users').deleteMany({});
-    await database().close();
+    (await database()).close();
   });
-  it('Debería crear un nuevo usuario', async () => {
+  it('Debería crear un nuevo usuario', async (done) => {
     const user = {
-      email: 'tester@test',
+      email: 'tester@test.pe',
       roles: {
         admin: false,
       },
     };
     const req = {
       body: {
-        email: 'tester@test',
-        password: 'test1',
+        email: 'tester@test.pe',
+        password: 'test123',
         roles: {
           admin: false,
         },
@@ -37,12 +37,74 @@ describe('CREAR USUARIO', () => {
         expect(result.email).toStrictEqual(user.email);
       },
     };
+    done();
     const next = (code) => code;
     await createUsers(req, res, next);
     // console.log('wea', req);
   });
+  it('Debería responder con 400 cuando falta correo', async (done) => {
+    const req = {
+      body: {
+        password: 'test123',
+        roles: {
+          admin: false,
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+    };
+    done();
+    await createUsers(req, {}, next);
+  });
+  it('Debería responder con 400 cuando falta password', async (done) => {
+    const req = {
+      body: {
+        email: 'tester@test.pe',
+        roles: {
+          admin: false,
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+    };
+    done();
+    await createUsers(req, {}, next);
+  });
+  it('Debería responder con 400 cuando el correo enviado no es válido', async (done) => {
+    const req = {
+      body: {
+        email: 'tester@test',
+        roles: {
+          admin: false,
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+    };
+    done();
+    await createUsers(req, {}, next);
+  });
+  it('Debería responder con 400 cuando el password tiene menos de 6 caracteres', async (done) => {
+    const req = {
+      body: {
+        email: 'tester@test',
+        password: 'tests',
+        roles: {
+          admin: false,
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+    };
+    done();
+    await createUsers(req, {}, next);
+  });
 });
-describe('OBTENER USUARIO- (PAGINACION)', () => {
+describe('getUsers- (PAGINACION)', () => {
   beforeAll(async () => {
     await database();
     const collectionUsers = await (await database()).collection('users');
@@ -67,7 +129,7 @@ describe('OBTENER USUARIO- (PAGINACION)', () => {
     await database().close();
   });
 
-  it('Deberia retoner 3 usuarios', () => {
+  it('Deberia retornar 3 usuarios', (done) => {
     const req = {
       query: {},
     };
@@ -82,10 +144,11 @@ describe('OBTENER USUARIO- (PAGINACION)', () => {
         expect(result[0].email).toBe('tester1@test');
       },
     };
+    done();
     getUsers(req, resp);
   });
 });
-describe('OBTNENER USUARIO POR SU ID', () => {
+describe('getUserById', () => {
   let users = null;
   beforeAll(async () => {
     await database();
@@ -102,7 +165,7 @@ describe('OBTNENER USUARIO POR SU ID', () => {
     await (await database()).collection('users').deleteMany({});
     await database().close();
   });
-  it('Deberia obtener un usuario por su id', () => {
+  it('Deberia obtener un usuario por su id', (done) => {
     const userId = users.insertedIds['0'];
     const req = {
       params: {
@@ -114,9 +177,10 @@ describe('OBTNENER USUARIO POR SU ID', () => {
         expect(response._id).toEqual(userId);
       },
     };
+    done();
     getUserById(req, resp);
   });
-  it('Deberia obtener un usuario por su email', () => {
+  it('Deberia obtener un usuario por su email', (done) => {
     const req = {
       params: {
         uid: 'testert@test',
@@ -127,10 +191,11 @@ describe('OBTNENER USUARIO POR SU ID', () => {
         expect(response.email).toBe('testert@test');
       },
     };
+    done();
     getUserById(req, resp);
   });
 });
-describe('ELIMINAR USUARIO', () => {
+describe('deleteUser', () => {
   let users = null;
   beforeAll(async () => {
     await database();
@@ -152,7 +217,7 @@ describe('ELIMINAR USUARIO', () => {
     await database().close();
   });
 
-  it('Deberia de poder eliminar un usuario por su uid', () => {
+  it('Deberia de poder eliminar un usuario por su uid', (done) => {
     const userId = users.insertedIds['0'];
     const req = {
       params: {
@@ -165,27 +230,26 @@ describe('ELIMINAR USUARIO', () => {
         expect(response._id).toEqual(userId);
       },
     };
-
+    done();
     deleteUser(req, resp);
   });
 
-  it('Deberia  eliminar un usuario por su email', () => {
+  it('Deberia  eliminar un usuario por su email', (done) => {
     const req = {
       params: {
         uid: 'test@delete',
       },
     };
-
     const resp = {
       send: (response) => {
         expect(response.email).toBe('test@delete');
       },
     };
-
+    done();
     deleteUser(req, resp);
   });
 });
-describe('MODIFICAR USUARIOS', () => {
+describe('updateUser', () => {
   let users = null;
   beforeAll(async () => {
     await database();
@@ -207,7 +271,7 @@ describe('MODIFICAR USUARIOS', () => {
     await database().close();
   });
 
-  it('Deberia actualizar un usuario por su uid', () => {
+  it('Deberia actualizar un usuario por su uid', (done) => {
     const userId = users.insertedIds['0'];
     const req = {
       params: {
@@ -224,18 +288,17 @@ describe('MODIFICAR USUARIOS', () => {
         email: 'tester@update',
       },
     };
-
     const resp = {
       send: (response) => {
         expect(response._id).toEqual(userId);
         expect(response.email).toBe('tester@update');
       },
     };
-
+    done();
     updateUser(req, resp);
   });
 
-  it('Deberia actualizar un usuario por su email', () => {
+  it('Deberia actualizar un usuario por su email', (done) => {
     const req = {
       params: {
         uid: 'tester@test',
@@ -251,13 +314,12 @@ describe('MODIFICAR USUARIOS', () => {
         email: 'terter@update',
       },
     };
-
     const resp = {
       send: (response) => {
         expect(response.email).toBe('email2@update');
       },
     };
-
+    done();
     updateUser(req, resp);
   });
 
