@@ -4,11 +4,6 @@ const { isValidEmail, pagination } = require('./utils');
 const { isAdmin } = require('../middleware/auth');
 const db = require('../conection/connection');
 
-const prueba = async () => {
-  const usersColl = (await db()).collection('users');
-  return usersColl;
-};
-console.log('pruebaaasss', prueba());
 
 module.exports = {
   getUsers: async (req, res, next) => {
