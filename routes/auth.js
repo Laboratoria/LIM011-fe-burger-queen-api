@@ -1,9 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const config = require('../config');
-
-const { dbUrl } = config;
-const database = require('../conection/connection');
+const db = require('../conection/connection');
 
 // console.log(db);
 
@@ -32,8 +30,8 @@ module.exports = (app, nextMain) => {
     }
 
     // TODO: autenticar a la usuarix
-    const db = await database(dbUrl);
-    const checkUser = await db.collection('users').findOne({ email });
+    const usersCollection = (await db()).collection('users');
+    const checkUser = await usersCollection.findOne({ email });
     if (!checkUser) {
       console.log('no existe el usuario registrado');
       return next(404);
@@ -41,15 +39,16 @@ module.exports = (app, nextMain) => {
     const comparePasswords = await bcrypt.compare(password, checkUser.password);
     /* console.log(password);
     console.log(checkUser.password); */
+    console.log('jojo', comparePasswords);
     if (!comparePasswords) {
       return next(404);
     }
     const token = jwt.sign({ uid: checkUser._id }, secret, { expiresIn: '3h' });
     console.log('auth', checkUser);
     console.log('auth', token);
-    resp.send({ token });
-    console.log('token(200) :)');
-    // next();
+    resp.status(200).send({ token });
+    // console.log('token(200) :)');
+    next();
   });
 
   return nextMain();

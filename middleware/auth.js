@@ -1,9 +1,6 @@
 const jwt = require('jsonwebtoken');
 const ObjectId = require('mongodb').ObjectID;
-const config = require('../config');
-
-const { dbUrl } = config;
-const database = require('../conection/connection');
+const db = require('../conection/connection');
 
 module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;
@@ -20,21 +17,16 @@ module.exports = (secret) => (req, resp, next) => {
       return next(403);
     }
     // TODO: Verificar identidad del usuario usando `decodeToken.uid`
-    const db = await database(dbUrl);
-    const checkUser = await db.collection('users').findOne();
-    console.log('middle buscando', checkUser);
-    console.log('viendo tipo', typeof checkUser._id);
-    console.log('viendo tipo2', checkUser._id);
-    console.log(decodedToken);
+    // console.log(decodedToken);
     const decode = decodedToken.uid;
-    console.log('decode', decode);
-    console.log('decode2 ', typeof decode);
-    console.log('decode3 ', { _id: decode });
-    // console.log('decode', decodedToken);
-    // console.log('decode.........', decode);
-    const user = await db.collection('users').findOne({ _id: ObjectId(decode) });
+    const usersCollection = (await db()).collection('users');
+    const exitUser = await usersCollection.findOne({ _id: ObjectId(decode) });
     // console.log('user', user);
-    req.headers.user = user;
+
+    if (!exitUser) {
+      return next(404);
+    }
+    req.headers.user = exitUser;
     // console.log(req.headers.user);
     // console.log(req.headers.user.roles.admin);
     next();
