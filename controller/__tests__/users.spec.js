@@ -11,12 +11,107 @@ const database = require('../../conection/__mocks__/connection');
 describe('createUsers', () => {
   beforeAll(async () => {
     await database();
+    const collectionUsers = await (await database()).collection('users');
+    // eslint-disable-next-line no-unused-vars
+    await collectionUsers.insertMany([
+      {
+        email: 'tester1@test.pe',
+        roles: { admin: true },
+      },
+      {
+        email: 'tester2@test.pe',
+        roles: { admin: false },
+      },
+    ]);
+    // console.log('users', users);
   });
   afterAll(async () => {
     await (await database()).collection('users').deleteMany({});
     (await database()).close();
   });
-  it('Debería crear un nuevo usuario', async (done) => {
+  it('Debería responder con 400 cuando falta correo', (done) => {
+    const req = {
+      body: {
+        password: 'test123',
+        roles: {
+          admin: false,
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+      done();
+    };
+    createUsers(req, {}, next);
+  });
+  it('Debería responder con 400 cuando falta password', (done) => {
+    const req = {
+      body: {
+        email: 'tester@test.pe',
+        roles: {
+          admin: false,
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+      done();
+    };
+    createUsers(req, {}, next);
+  });
+  it('Debería responder con 400 cuando el password tiene menos de 6 caracteres', (done) => {
+    const req = {
+      body: {
+        email: 'tester@test',
+        password: 'te',
+        roles: {
+          admin: false,
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+      done();
+    };
+    createUsers(req, {}, next);
+  });
+  it('Debería responder con 400 cuando el correo enviado no es válido', (done) => {
+    const req = {
+      body: {
+        email: 'tester',
+        password: 'test123',
+        roles: {
+          admin: false,
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+      done();
+    };
+    createUsers(req, {}, next);
+  });
+  it('Debería crear un nuevo usuario, aun si falta especificar roles', (done) => {
+    const req = {
+      body: {
+        email: 'tester@test.pe',
+        password: 'test123',
+      },
+    };
+    /* const next = (code) => {
+      expect(code).toBe(200);
+      done();
+    }; */
+    const res = {
+      send: (result) => {
+        console.log('estoy aqui');
+        expect(result.email).toEqual('tester@test.pe');
+        done();
+      },
+    };
+    createUsers(req, res);
+  });
+  it('Debería crear un nuevo usuario', (done) => {
     const user = {
       email: 'tester@test.pe',
       roles: {
@@ -33,18 +128,17 @@ describe('createUsers', () => {
       },
     };
     const res = {
-      send(result) {
-        expect(result.email).toStrictEqual(user.email);
+      send: (result) => {
+        expect(result.email).toBe(user.email);
+        done();
       },
     };
-    done();
-    const next = (code) => code;
-    await createUsers(req, res, next);
-    // console.log('wea', req);
+    createUsers(req, res);
   });
-  it('Debería responder con 400 cuando falta correo', async (done) => {
+  it('Debería responder con 403 cuando usuario ya existe', (done) => {
     const req = {
       body: {
+        email: 'tester1@test.pe',
         password: 'test123',
         roles: {
           admin: false,
@@ -52,56 +146,10 @@ describe('createUsers', () => {
       },
     };
     const next = (code) => {
-      expect(code).toBe(400);
+      expect(code).toBe(403);
+      done();
     };
-    done();
-    await createUsers(req, {}, next);
-  });
-  it('Debería responder con 400 cuando falta password', async (done) => {
-    const req = {
-      body: {
-        email: 'tester@test.pe',
-        roles: {
-          admin: false,
-        },
-      },
-    };
-    const next = (code) => {
-      expect(code).toBe(400);
-    };
-    done();
-    await createUsers(req, {}, next);
-  });
-  it('Debería responder con 400 cuando el correo enviado no es válido', async (done) => {
-    const req = {
-      body: {
-        email: 'tester@test',
-        roles: {
-          admin: false,
-        },
-      },
-    };
-    const next = (code) => {
-      expect(code).toBe(400);
-    };
-    done();
-    await createUsers(req, {}, next);
-  });
-  it('Debería responder con 400 cuando el password tiene menos de 6 caracteres', async (done) => {
-    const req = {
-      body: {
-        email: 'tester@test',
-        password: 'tests',
-        roles: {
-          admin: false,
-        },
-      },
-    };
-    const next = (code) => {
-      expect(code).toBe(400);
-    };
-    done();
-    await createUsers(req, {}, next);
+    createUsers(req, {}, next);
   });
 });
 describe('getUsers- (PAGINACION)', () => {
@@ -153,10 +201,9 @@ describe('getUserById', () => {
   beforeAll(async () => {
     await database();
     const collectionUsers = await (await database()).collection('users');
-    // console.log(' collectio', collectionUsers);
     users = await collectionUsers.insertMany([
       {
-        email: 'user@test',
+        email: 'user@test.pe',
         roles: { admin: true },
       },
     ]);
@@ -164,6 +211,18 @@ describe('getUserById', () => {
   afterAll(async () => {
     await (await database()).collection('users').deleteMany({});
     await database().close();
+  });
+  it('Debería responder con 404 cuando usuario no existe', (done) => {
+    const req = {
+      params: {
+        uid: 'user123@test.pe',
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(404);
+      done();
+    };
+    getUserById(req, {}, next);
   });
   it('Deberia obtener un usuario por su id', (done) => {
     const userId = users.insertedIds['0'];
@@ -175,23 +234,23 @@ describe('getUserById', () => {
     const resp = {
       send: (response) => {
         expect(response._id).toEqual(userId);
+        done();
       },
     };
-    done();
     getUserById(req, resp);
   });
   it('Deberia obtener un usuario por su email', (done) => {
     const req = {
       params: {
-        uid: 'testert@test',
+        uid: 'user@test.pe',
       },
     };
     const resp = {
       send: (response) => {
-        expect(response.email).toBe('testert@test');
+        expect(response.email).toBe('user@test.pe');
+        done();
       },
     };
-    done();
     getUserById(req, resp);
   });
 });
@@ -202,11 +261,11 @@ describe('deleteUser', () => {
     const collectionUsers = await (await database()).collection('users');
     users = await collectionUsers.insertMany([
       {
-        email: 'test@test',
+        email: 'test@test.pe',
         roles: { admin: false },
       },
       {
-        email: 'test@delete',
+        email: 'test@delete.pe',
         roles: { admin: false },
       },
     ]);
@@ -228,24 +287,24 @@ describe('deleteUser', () => {
     const resp = {
       send: (response) => {
         expect(response._id).toEqual(userId);
+        done();
       },
     };
-    done();
     deleteUser(req, resp);
   });
 
   it('Deberia  eliminar un usuario por su email', (done) => {
     const req = {
       params: {
-        uid: 'test@delete',
+        uid: 'test@delete.pe',
       },
     };
     const resp = {
       send: (response) => {
-        expect(response.email).toBe('test@delete');
+        expect(response.email).toBe('test@delete.pe');
+        done();
       },
     };
-    done();
     deleteUser(req, resp);
   });
 });
@@ -256,71 +315,57 @@ describe('updateUser', () => {
     const collectionUsers = await (await database()).collection('users');
     users = await collectionUsers.insertMany([
       {
-        email: 'test@test',
+        email: 'test@test.pe',
         roles: { admin: true },
       },
       {
-        email: 'test2@test',
+        email: 'test2@test.pe',
         roles: { admin: false },
       },
     ]);
+    // console.log('user', users);
   });
 
   afterAll(async () => {
     await (await database()).collection('users').deleteMany({});
     await database().close();
   });
-
   it('Deberia actualizar un usuario por su uid', (done) => {
     const userId = users.insertedIds['0'];
+    // console.log('userId', userId);
     const req = {
       params: {
         uid: userId,
       },
-      headers: {
-        authenticatedUser: {
-          roles: {
-            admin: true,
-          },
-        },
-      },
       body: {
-        email: 'tester@update',
+        email: 'tester@update.pe',
       },
     };
     const resp = {
       send: (response) => {
         expect(response._id).toEqual(userId);
-        expect(response.email).toBe('tester@update');
+        expect(response.email).toBe('tester@update.pe');
+        done();
       },
     };
-    done();
     updateUser(req, resp);
   });
 
   it('Deberia actualizar un usuario por su email', (done) => {
     const req = {
       params: {
-        uid: 'tester@test',
-      },
-      headers: {
-        authenticatedUser: {
-          roles: {
-            admin: true,
-          },
-        },
+        uid: 'tester@test.pe',
       },
       body: {
-        email: 'terter@update',
+        email: 'email2@update.pe',
       },
     };
     const resp = {
       send: (response) => {
-        expect(response.email).toBe('email2@update');
+        expect(response.email).toBe('email2@update.pe');
+        done();
       },
     };
-    done();
     updateUser(req, resp);
   });
-
 });
