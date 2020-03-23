@@ -78,7 +78,7 @@ describe('GET /products', () => {
         // console.log('que es esto', lastQuery.page);
 
         expect(nextQuery.limit).toBe('1');
-        expect(nextQuery.page).toBe('2');
+        expect(nextQuery.page).toBe('1');
         expect(lastQuery.limit).toBe('1');
         expect(lastQuery.page >= 1).toBe(true);
 
@@ -107,9 +107,9 @@ describe('GET /products', () => {
         expect(prevQuery.limit).toBe('1');
         expect(prevQuery.page).toBe('1');
         expect(Array.isArray(json)).toBe(true);
-        expect(json.length).toBe(0);
-        /*         expect(json[0]).toHaveProperty('_id');
-        expect(json[0]).toHaveProperty('name'); */
+        expect(json.length).toBe(1);
+        expect(json[0]).toHaveProperty('_id');
+        expect(json[0]).toHaveProperty('name');
       })
   ));
 });
