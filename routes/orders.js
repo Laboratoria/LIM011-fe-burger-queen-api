@@ -6,7 +6,7 @@ const {
   getOrderById,
   getOrders,
   updateOrder,
-  deleteOrder
+  deleteOrder,
 } = require('../controller/OrdersController');
 /** @module orders */
 module.exports = (app, nextMain) => {

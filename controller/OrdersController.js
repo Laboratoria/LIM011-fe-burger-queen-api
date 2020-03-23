@@ -65,9 +65,6 @@ module.exports = {
   },
 
   updateOrder: async (req, res, next) => {
-    const {
-      userId, products, client, status,
-    } = req.body;
     const { orderId } = req.params;
     const query = (ObjectId.isValid(orderId) ? { _id: ObjectId(orderId) } : { _id: orderId });
     const ordersCollection = (await db()).collection('orders');
@@ -75,10 +72,13 @@ module.exports = {
     if (!checkOrder) {
       return next(404);
     }
+    const {
+      userId, products, client, status,
+    } = req.body;
     if ((!userId && !client && !products && !status)) {
       return next(400);
     }
-    if ((status !== 'preparing' && status !== 'pending' && status !== 'canceled' && status !== 'delivering' && status !== 'delivered')) {
+    if (status && (status !== 'preparing' && status !== 'pending' && status !== 'canceled' && status !== 'delivering' && status !== 'delivered')) {
       return next(400);
     }
     let groupOfProducts;
