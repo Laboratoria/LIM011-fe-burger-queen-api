@@ -1,5 +1,5 @@
 TN:
-SF:/home/kiswari/Desktop/Burger Queen API/LIM011-fe-burger-queen-api/config.js
+SF:/home/lizbeth/Documents/LAB-11/LIM011-fe-burger-queen-api/config.js
 FNF:0
 FNH:0
 DA:1,1
@@ -24,7 +24,7 @@ BRF:11
 BRH:9
 end_of_record
 TN:
-SF:/home/kiswari/Desktop/Burger Queen API/LIM011-fe-burger-queen-api/conection/connection.js
+SF:/home/lizbeth/Documents/LAB-11/LIM011-fe-burger-queen-api/conection/connection.js
 FN:8,(anonymous_0)
 FNF:1
 FNH:1
@@ -45,7 +45,7 @@ BRF:2
 BRH:1
 end_of_record
 TN:
-SF:/home/kiswari/Desktop/Burger Queen API/LIM011-fe-burger-queen-api/controller/usersController.js
+SF:/home/lizbeth/Documents/LAB-11/LIM011-fe-burger-queen-api/controller/usersController.js
 FN:9,(anonymous_0)
 FN:17,(anonymous_1)
 FN:25,(anonymous_2)
@@ -181,7 +181,7 @@ BRF:42
 BRH:16
 end_of_record
 TN:
-SF:/home/kiswari/Desktop/Burger Queen API/LIM011-fe-burger-queen-api/controller/utils.js
+SF:/home/lizbeth/Documents/LAB-11/LIM011-fe-burger-queen-api/controller/utils.js
 FN:2,(anonymous_0)
 FN:7,(anonymous_1)
 FNF:2
@@ -203,7 +203,7 @@ BRF:2
 BRH:0
 end_of_record
 TN:
-SF:/home/kiswari/Desktop/Burger Queen API/LIM011-fe-burger-queen-api/middleware/auth.js
+SF:/home/lizbeth/Documents/LAB-11/LIM011-fe-burger-queen-api/middleware/auth.js
 FN:5,(anonymous_0)
 FN:5,(anonymous_1)
 FN:15,(anonymous_2)
