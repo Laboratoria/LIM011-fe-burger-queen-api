@@ -1,4 +1,4 @@
-// const ObjectId = require('mongodb').ObjectID;
+/* eslint-disable max-len */
 const {
   createUsers,
   getUserById,
@@ -6,24 +6,11 @@ const {
   deleteUser,
   updateUser,
 } = require('../usersController');
-const database = require('../../conection/__mocks__/connection');
+const database = require('../../conection/connection');
 
 describe('createUsers', () => {
   beforeAll(async () => {
     await database();
-    const collectionUsers = await (await database()).collection('users');
-    // eslint-disable-next-line no-unused-vars
-    await collectionUsers.insertMany([
-      {
-        email: 'tester1@test.pe',
-        roles: { admin: true },
-      },
-      {
-        email: 'tester2@test.pe',
-        roles: { admin: false },
-      },
-    ]);
-    // console.log('users', users);
   });
   afterAll(async () => {
     await (await database()).collection('users').deleteMany({});
@@ -98,13 +85,8 @@ describe('createUsers', () => {
         password: 'test123',
       },
     };
-    /* const next = (code) => {
-      expect(code).toBe(200);
-      done();
-    }; */
     const res = {
       send: (result) => {
-        console.log('estoy aqui');
         expect(result.email).toEqual('tester@test.pe');
         done();
       },
@@ -113,14 +95,15 @@ describe('createUsers', () => {
   });
   it('Debería crear un nuevo usuario', (done) => {
     const user = {
-      email: 'tester@test.pe',
+      email: 'tester1@test.pe',
+      password: 'test123',
       roles: {
         admin: false,
       },
     };
     const req = {
       body: {
-        email: 'tester@test.pe',
+        email: 'tester1@test.pe',
         password: 'test123',
         roles: {
           admin: false,
@@ -129,7 +112,7 @@ describe('createUsers', () => {
     };
     const res = {
       send: (result) => {
-        expect(result.email).toBe(user.email);
+        expect(result.email).toEqual(user.email);
         done();
       },
     };
@@ -138,7 +121,7 @@ describe('createUsers', () => {
   it('Debería responder con 403 cuando usuario ya existe', (done) => {
     const req = {
       body: {
-        email: 'tester1@test.pe',
+        email: 'tester@test.pe',
         password: 'test123',
         roles: {
           admin: false,
@@ -158,15 +141,15 @@ describe('getUsers- (PAGINACION)', () => {
     const collectionUsers = await (await database()).collection('users');
     await collectionUsers.insertMany([
       {
-        email: 'tester1@test',
+        email: 'tester1@test.com',
         roles: { admin: true },
       },
       {
-        email: 'tester2@test',
+        email: 'tester2@test.com',
         roles: { admin: false },
       },
       {
-        email: 'tester3@test',
+        email: 'tester3@test.com',
         roles: { admin: false },
       },
     ]);
@@ -177,7 +160,7 @@ describe('getUsers- (PAGINACION)', () => {
     await database().close();
   });
 
-  it('Deberia retornar 3 usuarios', (done) => {
+  it('Deberia retornar la primera página con 3 usuarios y limite 10 por defecto', (done) => {
     const req = {
       query: {},
     };
@@ -185,14 +168,15 @@ describe('getUsers- (PAGINACION)', () => {
     const resp = {
       set: (nameHeader, header) => {
         expect(nameHeader).toBe('link');
-        expect(header).toBe('</users?limit=10&page=1>; rel="first", </users?limit=10&page=1>; rel="prev", </users?limit=10&page=1>; rel="next", </users?limit=10&page=1>; rel="first"');
+        expect(header).toEqual('</users?page=1&limit=10>; rel="first",</users?page=1&limit=10>; rel="last",</users?page=1&limit=10>; rel="prev",</users?page=1&limit=10>; rel="next"');
+        done();
       },
       send: (result) => {
         expect(result.length).toBe(3);
-        expect(result[0].email).toBe('tester1@test');
+        expect(result[0].email).toBe('tester1@test.com');
+        done();
       },
     };
-    done();
     getUsers(req, resp);
   });
 });
@@ -307,6 +291,18 @@ describe('deleteUser', () => {
     };
     deleteUser(req, resp);
   });
+  it('Debería responder con 404 cuando usuario no existe', (done) => {
+    const req = {
+      params: {
+        uid: 'test@lab.pe',
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(404);
+      done();
+    };
+    deleteUser(req, {}, next);
+  });
 });
 describe('updateUser', () => {
   let users = null;
@@ -323,28 +319,90 @@ describe('updateUser', () => {
         roles: { admin: false },
       },
     ]);
-    // console.log('user', users);
   });
 
   afterAll(async () => {
     await (await database()).collection('users').deleteMany({});
     await database().close();
   });
-  it('Deberia actualizar un usuario por su uid', (done) => {
+  it('Deberia responder con 400 si no existe email y/ password ', (done) => {
     const userId = users.insertedIds['0'];
-    // console.log('userId', userId);
     const req = {
       params: {
         uid: userId,
       },
       body: {
-        email: 'tester@update.pe',
+      },
+      headers: {
+        user: {
+          email: 'test@test.pe',
+          roles: { admin: true },
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(400);
+      done();
+    };
+    updateUser(req, {}, next);
+  });
+  it('Deberia responder con 403 si usuario no es admin y quiere cambiar roles', (done) => {
+    const userId = users.insertedIds['0'];
+    const req = {
+      params: {
+        uid: userId,
+      },
+      body: {
+        roles: { admin: true },
+      },
+      headers: {
+        user: {
+          email: 'test2@test.pe',
+          roles: { admin: false },
+        },
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(403);
+      done();
+    };
+    updateUser(req, {}, next);
+  });
+  it('Deberia responder con 404 si no es usuario a modificar ni es admin', (done) => {
+    const req = {
+      params: {
+        uid: 'test2020@test.pe',
+      },
+      body: {
+        password: 'peru2020',
+      },
+    };
+    const next = (code) => {
+      expect(code).toBe(404);
+      done();
+    };
+    updateUser(req, {}, next);
+  });
+  it('Deberia actualizar un usuario por su uid', (done) => {
+    const userId = users.insertedIds['0'];
+    const req = {
+      params: {
+        uid: userId,
+      },
+      body: {
+        password: 'laboratoria',
+      },
+      headers: {
+        user: {
+          email: 'test@test.pe',
+          roles: { admin: true },
+        },
       },
     };
     const resp = {
       send: (response) => {
         expect(response._id).toEqual(userId);
-        expect(response.email).toBe('tester@update.pe');
+/*         expect(response.email).toBe('tester@update.pe'); */
         done();
       },
     };
@@ -354,10 +412,16 @@ describe('updateUser', () => {
   it('Deberia actualizar un usuario por su email', (done) => {
     const req = {
       params: {
-        uid: 'tester@test.pe',
+        uid: 'test2@test.pe',
       },
       body: {
         email: 'email2@update.pe',
+      },
+      headers: {
+        user: {
+          email: 'test2@test.pe',
+          roles: { admin: false },
+        },
       },
     };
     const resp = {

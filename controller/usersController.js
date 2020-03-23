@@ -6,12 +6,12 @@ const db = require('../conection/connection');
 
 
 module.exports = {
-  getUsers: async (req, res, next) => {
+  getUsers: async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const page = parseInt(req.query.page, 10) || 1;
     const startIndex = (page - 1) * limit;
     const usersCollection = (await db()).collection('users');
-    const allUsers = (await usersCollection.find()
+    const allUsers = (await usersCollection.find({})
       .skip(startIndex).limit(limit)
       .toArray())
       .map(({ _id, email, roles }) => ({ _id, email, roles }));
@@ -20,7 +20,6 @@ module.exports = {
     const linksHeader = pagination('users', page, numberOfPages, limit);
     res.set('link', `${linksHeader.first},${linksHeader.last},${linksHeader.prev},${linksHeader.next}`);
     res.send(allUsers);
-    next();
   },
   getUserById: async (req, resp, next) => {
     const { uid } = req.params;
@@ -95,19 +94,17 @@ module.exports = {
     if (!(email || password)) {
       return next(400);
     }
-    const passwords = bcrypt.hashSync(password, 10);
     await collectionUsers.updateOne(
       query, {
         $set: {
-          email: req.body.email || user.email,
-          password: passwords || user.passwords,
-          roles: user.roles || user.roles,
+          email: email || user.email,
+          password: password ? bcrypt.hashSync(password, 10) : user.passwords,
+          roles: roles || user.roles,
         },
       },
     );
     const updateUser = await collectionUsers.findOne({ _id: ObjectId(user._id) });
     res.send(updateUser);
-    next();
   },
   deleteUser: async (req, resp, next) => {
     const { uid } = req.params;
@@ -125,7 +122,5 @@ module.exports = {
 
     await usersCollection.deleteOne(query);
     resp.send({ _id: user._id, email: user.email, roles: user.roles });
-
-    next();
   },
 };
