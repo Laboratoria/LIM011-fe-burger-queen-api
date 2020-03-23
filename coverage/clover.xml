@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1584996726971" clover="3.2.0">
-  <project timestamp="1584996726971" name="All files">
-    <metrics statements="230" coveredstatements="210" conditionals="161" coveredconditionals="141" methods="29" coveredmethods="22" elements="420" coveredelements="373" complexity="0" loc="230" ncloc="230" packages="4" files="7" classes="7"/>
+<coverage generated="1584998330333" clover="3.2.0">
+  <project timestamp="1584998330333" name="All files">
+    <metrics statements="230" coveredstatements="210" conditionals="161" coveredconditionals="139" methods="29" coveredmethods="22" elements="420" coveredelements="371" complexity="0" loc="230" ncloc="230" packages="4" files="7" classes="7"/>
     <package name="LIM011-fe-burger-queen-api">
-      <metrics statements="5" coveredstatements="5" conditionals="11" coveredconditionals="10" methods="0" coveredmethods="0"/>
+      <metrics statements="5" coveredstatements="5" conditionals="11" coveredconditionals="8" methods="0" coveredmethods="0"/>
       <file name="config.js" path="/home/lizbeth/Documents/LAB-11/LIM011-fe-burger-queen-api/config.js">
-        <metrics statements="5" coveredstatements="5" conditionals="11" coveredconditionals="10" methods="0" coveredmethods="0"/>
-        <line num="1" count="3" type="cond" truecount="3" falsecount="0"/>
+        <metrics statements="5" coveredstatements="5" conditionals="11" coveredconditionals="8" methods="0" coveredmethods="0"/>
+        <line num="1" count="3" type="cond" truecount="1" falsecount="2"/>
         <line num="2" count="3" type="cond" truecount="1" falsecount="1"/>
         <line num="3" count="3" type="cond" truecount="2" falsecount="0"/>
         <line num="4" count="3" type="cond" truecount="2" falsecount="0"/>
