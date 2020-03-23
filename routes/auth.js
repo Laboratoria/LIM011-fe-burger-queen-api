@@ -3,9 +3,6 @@ const bcrypt = require('bcrypt');
 const config = require('../config');
 const db = require('../conection/connection');
 
-// console.log(db);
-
-
 const { secret } = config;
 
 /** @module auth */
@@ -33,19 +30,17 @@ module.exports = (app, nextMain) => {
     const usersCollection = (await db()).collection('users');
     const checkUser = await usersCollection.findOne({ email });
     if (!checkUser) {
-      console.log('no existe el usuario registrado');
       return next(404);
     }
     const comparePasswords = await bcrypt.compare(password, checkUser.password);
     /* console.log(password);
     console.log(checkUser.password); */
-    console.log('jojo', comparePasswords);
     if (!comparePasswords) {
       return next(404);
     }
     const token = jwt.sign({ uid: checkUser._id }, secret, { expiresIn: '3h' });
-    console.log('auth', checkUser);
-    console.log('auth', token);
+    /* console.log('auth', checkUser);
+    console.log('auth', token); */
     resp.status(200).send({ token });
     // console.log('token(200) :)');
     next();

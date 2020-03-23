@@ -25,8 +25,8 @@ module.exports = {
       dateProcessed: '',
     };
     const ordersCollection = (await db()).collection('orders');
-    (await ordersCollection.insertOne(newOrder)).insertedId;
-    const order = await ordersCollection.findOne(newOrder);
+    const saveOrder = (await ordersCollection.insertOne(newOrder)).insertedId;
+    const order = await ordersCollection.findOne(saveOrder);
     res.send(order);
   },
   getOrderById: async (req, res, next) => {
@@ -46,41 +46,41 @@ module.exports = {
     const startIndex = (page - 1) * limit;
     const ordersCollection = (await db()).collection('orders');
     const allOrders = await ordersCollection.find().skip(startIndex).limit(limit).toArray();
-    const numberOfProducts = await ordersCollection.find().count();
-    const numberOfPages = Math.ceil(numberOfProducts / limit);
-    const linksHeader = pagination('products', page, numberOfPages, limit);
+    const numberOfOrders = await ordersCollection.find().count();
+    const numberOfPages = Math.ceil(numberOfOrders / limit);
+    const linksHeader = pagination('orders', page, numberOfPages, limit);
     resp.set('link', `${linksHeader.first},${linksHeader.last},${linksHeader.prev},${linksHeader.next}`);
     resp.send(allOrders);
   },
   deleteOrder: async (req, res, next) => {
     const { orderId } = req.params;
-    if (!ObjectId.isValid(orderId)) {
-      return next(404);
-    }
-    const query = { _id: ObjectId(orderId) };
-    const ordersCollection = (await db()).collection('orders');
-    const checkOrder = await ordersCollection.findOne(query);
-    if (!checkOrder) {
-      return next(404);
-    }
-    const deleteOrder = await ordersCollection.deleteOne({ _id: checkOrder._id });
-    res.send(deleteOrder);
-  },
-
-  updateOrder: async (req, res, next) => {
-    const {
-      userId, products, client = '', status, dateEntry, dateProcessed,
-    } = req.body;
-    const { orderId } = req.params;
-
-
     const query = (ObjectId.isValid(orderId) ? { _id: ObjectId(orderId) } : { _id: orderId });
     const ordersCollection = (await db()).collection('orders');
     const checkOrder = await ordersCollection.findOne(query);
     if (!checkOrder) {
       return next(404);
     }
+    const deletedOrder = await ordersCollection.deleteOne({ _id: checkOrder._id });
+    res.send(deletedOrder);
+  },
 
+  updateOrder: async (req, res, next) => {
+    const {
+      userId, products, client, status,
+    } = req.body;
+    const { orderId } = req.params;
+    const query = (ObjectId.isValid(orderId) ? { _id: ObjectId(orderId) } : { _id: orderId });
+    const ordersCollection = (await db()).collection('orders');
+    const checkOrder = await ordersCollection.findOne(query);
+    if (!checkOrder) {
+      return next(404);
+    }
+    if ((!userId && !client && !products && !status)) {
+      return next(400);
+    }
+    if ((status !== 'preparing' && status !== 'pending' && status !== 'canceled' && status !== 'delivering' && status !== 'delivered')) {
+      return next(400);
+    }
     let groupOfProducts;
     if (!products) {
       groupOfProducts = checkOrder.products;
@@ -93,28 +93,17 @@ module.exports = {
         })),
       );
     }
-
-    if ((!userId && !client && !products && !status)) {
-      return next(400);
-    }
-    if ((status !== 'preparing' && status !== 'pending' && status !== 'canceled' && status !== 'delivering' && status !== 'delivered')) {
-      return next(400);
-    }
-
     const updateOrders = {
       userId: userId || checkOrder.userId,
       client: client || checkOrder.client,
       products: groupOfProducts,
       status: status || checkOrder.status,
-      dateEntry: dateEntry || checkOrder.dateEntry,
-      dateProcessed: dateProcessed || new Date(),
+      dateProcessed: new Date(),
     };
-
     await ordersCollection.updateOne(query,
       { $set: updateOrders });
     const updatenewOrder = await ordersCollection.findOne(query);
 
     res.send(updatenewOrder);
   },
-
 };

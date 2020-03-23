@@ -402,7 +402,6 @@ describe('updateUser', () => {
     const resp = {
       send: (response) => {
         expect(response._id).toEqual(userId);
-/*         expect(response.email).toBe('tester@update.pe'); */
         done();
       },
     };

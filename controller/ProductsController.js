@@ -45,19 +45,19 @@ module.exports = {
   },
   updateProduct: async (req, res, next) => {
     const { productId } = req.params;
-    const {
-      name, price, imagen, type,
-    } = req.body;
     const query = (ObjectId.isValid(productId) ? { _id: ObjectId(productId) } : { _id: productId });
     const productsCollection = (await db()).collection('products');
     const checkProduct = await productsCollection.findOne(query);
     if (!checkProduct) {
       return next(404);
     }
+    const {
+      name, price, imagen, type,
+    } = req.body;
     if (!name && !price && !imagen && !type) {
       return next(400);
     }
-    if (typeof price !== 'number') {
+    if (price && typeof price !== 'number') {
       return next(400);
     }
     const updateProps = {
@@ -69,15 +69,11 @@ module.exports = {
     await productsCollection.updateOne(query,
       { $set: updateProps });
     const updateProduct = await productsCollection.findOne(query);
-
     res.send(updateProduct);
   },
   deleteProduct: async (req, res, next) => {
     const { productId } = req.params;
-    if (!ObjectId.isValid(productId)) {
-      return next(404);
-    }
-    const query = { _id: ObjectId(productId) };
+    const query = (ObjectId.isValid(productId) ? { _id: ObjectId(productId) } : { _id: productId });
     const productsCollection = (await db()).collection('products');
     const checkProduct = await productsCollection.findOne(query);
     if (!checkProduct) {
