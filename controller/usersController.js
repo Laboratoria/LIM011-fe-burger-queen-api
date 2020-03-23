@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const ObjectId = require('mongodb').ObjectID;
 const { isValidEmail, pagination } = require('./utils');
-const { isAdmin } = require('../middleware/auth');
 const db = require('../conection/connection');
 
 
@@ -88,7 +87,7 @@ module.exports = {
     if (!user) {
       return next(404);
     }
-    if (!isAdmin(req) && roles) {
+    if (!req.headers.user.roles.admin && roles) {
       return next(403);
     }
     if (!(email || password)) {
