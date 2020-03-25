@@ -7,11 +7,13 @@ const errorHandler = require('./middleware/error');
 const routes = require('./routes');
 const pkg = require('./package.json');
 
-
-const { port, dbUrl, secret } = config;
+const { port, secret } = config;
 const app = express();
 
-app.set('config', config);
+const init = async () => {
+  connectionMongoDB()
+  .then(() => {
+    app.set('config', config);
 app.set('pkg', pkg);
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
@@ -31,40 +33,7 @@ routes(app, (err) => {
   });
 });
 
-// TODO: Conección a la BD en mogodb
-
-/* let database;
-
-// Conexion normal
-
-mongoClient.connect(dbUrl, { useUnifiedTopology: true }, (err, db) => {
-  if (err) {
-    console.log(err.message);
-  }
-  console.log('Connected successfully to server');
-  database = db;
-  console.log(database);
-  db.close();
-}); */
-
-// Con promesas
-
-/* connectionMongoDB()
-  .then((database) => {
-    console.log('Connected successfully to server');
-    console.log(database);
-  }); */
-
-/* mongoClient.connect(dbUrl, { useUnifiedTopology: true })
-  .then((db) => {
-    console.log('Connected successfully to server');
-    db.close();
-  }); */
-
-// Con async y await
-
-const init = async () => {
-  connectionMongoDB(dbUrl);
+  });
   console.log('Connected successfully to server');
 };
 
