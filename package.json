@@ -16,12 +16,11 @@
     "test:e2e:users": "jest --verbose --testPathPattern e2e/users.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
     "test:e2e:products": "jest --verbose --testPathPattern e2e/products.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
     "test:e2e:orders": "jest --verbose --testPathPattern e2e/orders.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
-    "test:unit": "jest --coverage --verbose --testPathPattern  ./controller/__tests__ --globalSetup ./controller/__tests__/globalSetup --testPathIgnorePatterns ./controller/__tests__/globalSetup" ,
+    "test:unit": "jest --coverage --verbose --testPathPattern  ./controller/__tests__ --globalSetup ./controller/__tests__/globalSetup --testPathIgnorePatterns ./controller/__tests__/globalSetup",
     "test": "npm run test:e2e && npm run test:unit",
     "lint": "eslint .",
     "docs:generate": "jsdoc -c jsdoc.conf --readme README-docs.md",
     "docs:deploy": "rm -rf docs && npm run docs:generate && gh-pages -d docs"
-    
   },
   "dependencies": {
     "bcrypt": "^3.0.7",
