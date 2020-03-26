@@ -6,11 +6,17 @@
   "engines": {
     "node": ">=10"
   },
+  "jest": {
+    "verbose": true
+  },
   "scripts": {
     "pretest": "eslint .",
     "start": "node index.js",
     "test:e2e": "jest --verbose --testPathPattern e2e --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
-    "test:unit": "jest --verbose --testPathIgnorePatterns e2e",
+    "test:e2e:users": "jest --verbose --testPathPattern e2e/users.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
+    "test:e2e:products": "jest --verbose --testPathPattern e2e/products.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
+    "test:e2e:orders": "jest --verbose --testPathPattern e2e/orders.spec.js --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
+    "test:unit": "jest --coverage --verbose --testPathPattern  ./controller/__tests__ --globalSetup ./controller/__tests__/globalSetup --testPathIgnorePatterns ./controller/__tests__/globalSetup",
     "test": "npm run test:e2e && npm run test:unit",
     "lint": "eslint .",
     "docs:generate": "jsdoc -c jsdoc.conf --readme README-docs.md",
@@ -20,7 +26,9 @@
     "bcrypt": "^3.0.7",
     "body-parser": "1.19.0",
     "express": "4.17.1",
-    "jsonwebtoken": "8.5.1"
+    "jsonwebtoken": "8.5.1",
+    "mongodb": "^3.5.3",
+    "node-emoji": "^1.10.0"
   },
   "devDependencies": {
     "docdash": "1.1.1",
@@ -28,9 +36,10 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "gh-pages": "2.1.1",
-    "jest": "24.9.0",
+    "jest": "^24.9.0",
     "jsdoc": "3.6.3",
     "jsdoc-http-plugin": "0.3.1",
+    "mongodb-memory-server": "^6.2.4",
     "node-fetch": "2.6.0",
     "tree-kill": "1.2.1"
   }

@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const config = require('../config');
+const db = require('../conection/connection');
 
 const { secret } = config;
 
@@ -17,7 +19,7 @@ module.exports = (app, nextMain) => {
    * @code {400} si no se proveen `email` o `password` o ninguno de los dos
    * @auth No requiere autenticación
    */
-  app.post('/auth', (req, resp, next) => {
+  app.post('/auth', async (req, resp, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -25,6 +27,20 @@ module.exports = (app, nextMain) => {
     }
 
     // TODO: autenticar a la usuarix
+    const usersCollection = (await db()).collection('users');
+    const checkUser = await usersCollection.findOne({ email });
+    if (!checkUser) {
+      return next(404);
+    }
+    const comparePasswords = await bcrypt.compare(password, checkUser.password);
+   
+    if (!comparePasswords) {
+      return next(404);
+    }
+    const token = jwt.sign({ uid: checkUser._id }, secret, { expiresIn: '3h' });
+   
+    resp.status(200).send({ token });
+ 
     next();
   });
 

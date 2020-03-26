@@ -1,9 +1,17 @@
+const url = require('url');
+const qs = require('querystring');
+
 const {
   fetch,
   fetchAsTestUser,
   fetchAsAdmin,
 } = process;
 
+const parseLinkHeader = (str) => str.split(',')
+  .reduce((memo, item) => {
+    const [, value, key] = /^<(.*)>;\s+rel="(first|last|prev|next)"/.exec(item.trim());
+    return { ...memo, [key]: value };
+  }, {});
 
 describe('POST /products', () => {
   it('should fail with 401 when no auth', () => (
@@ -38,7 +46,6 @@ describe('POST /products', () => {
   ));
 });
 
-
 describe('GET /products', () => {
   it('should get products with Auth', () => (
     fetchAsTestUser('/products')
@@ -53,6 +60,56 @@ describe('GET /products', () => {
           expect(typeof product.name).toBe('string');
           expect(typeof product.price).toBe('number');
         });
+      })
+  ));
+  it('should get products with pagination', () => (
+    fetchAsAdmin('/products?limit=1')
+      .then((resp) => {
+        expect(resp.status).toBe(200);
+        return resp.json().then((json) => ({ headers: resp.headers, json }));
+      })
+      .then(({ headers, json }) => {
+        const linkHeader = parseLinkHeader(headers.get('link'));
+
+        const nextUrlObj = url.parse(linkHeader.next);
+        const lastUrlObj = url.parse(linkHeader.last);
+        const nextQuery = qs.parse(nextUrlObj.query);
+        const lastQuery = qs.parse(lastUrlObj.query);
+        // console.log('que es esto', lastQuery.page);
+
+        expect(nextQuery.limit).toBe('1');
+        expect(nextQuery.page).toBe('1');
+        expect(lastQuery.limit).toBe('1');
+        expect(lastQuery.page >= 1).toBe(true);
+
+        expect(Array.isArray(json)).toBe(true);
+        // console.log('a ver ps', json);
+        expect(json.length).toBe(1);
+        expect(json[0]).toHaveProperty('_id');
+        expect(json[0]).toHaveProperty('name');
+        return fetchAsAdmin(nextUrlObj.path);
+      })
+      .then((resp) => {
+        expect(resp.status).toBe(200);
+        return resp.json().then((json) => ({ headers: resp.headers, json }));
+      })
+      .then(({ headers, json }) => {
+        const linkHeader = parseLinkHeader(headers.get('link'));
+
+        const firstUrlObj = url.parse(linkHeader.first);
+        const prevUrlObj = url.parse(linkHeader.prev);
+
+        const firstQuery = qs.parse(firstUrlObj.query);
+        const prevQuery = qs.parse(prevUrlObj.query);
+
+        expect(firstQuery.limit).toBe('1');
+        expect(firstQuery.page).toBe('1');
+        expect(prevQuery.limit).toBe('1');
+        expect(prevQuery.page).toBe('1');
+        expect(Array.isArray(json)).toBe(true);
+        expect(json.length).toBe(1);
+        expect(json[0]).toHaveProperty('_id');
+        expect(json[0]).toHaveProperty('name');
       })
   ));
 });
