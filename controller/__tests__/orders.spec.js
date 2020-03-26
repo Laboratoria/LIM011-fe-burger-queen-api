@@ -89,7 +89,7 @@ describe('createOrder', () => {
     const resp = {
       send: (response) => {
         expect(response.products[0].product._id).toStrictEqual(allProductsIds['0']);
-        // console.log(response);
+       
         done();
       },
     };

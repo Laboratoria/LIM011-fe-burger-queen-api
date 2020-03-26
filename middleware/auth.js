@@ -16,21 +16,19 @@ module.exports = (secret) => (req, resp, next) => {
     if (err) {
       return next(403);
     }
-    // TODO: Verificar identidad del usuario usando `decodeToken.uid`
-    // console.log(decodedToken);
+    
     const decode = decodedToken.uid;
     const usersCollection = (await db()).collection('users');
     const exitUser = await usersCollection.findOne({ _id: ObjectId(decode) });
-    // console.log('user', user);
+
 
     if (!exitUser) {
       return next(404);
     }
     req.headers.user = exitUser;
-    // console.log(req.headers.user);
-    // console.log(req.headers.user.roles.admin);
+  
     next();
-    // decoded = jwt.decode(token, { complete: true });
+
   });
 };
 
@@ -47,8 +45,6 @@ module.exports.isAdmin = (req) => (
 );
 
 module.exports.isUserOrAdmin = (req, resp, next) => (
-  // console.log('deadpool', typeof req.headers.user._id)
-  // console.log('deadpool2', ObjectId(req.params.uid))
   ((module.exports.isAdmin(req))
   || ((module.exports.isAuthenticated(req).email === req.params.uid)
   || (module.exports.isAuthenticated(req)._id.toString() === (req.params.uid))))

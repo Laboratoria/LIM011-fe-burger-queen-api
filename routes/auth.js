@@ -33,16 +33,14 @@ module.exports = (app, nextMain) => {
       return next(404);
     }
     const comparePasswords = await bcrypt.compare(password, checkUser.password);
-    /* console.log(password);
-    console.log(checkUser.password); */
+   
     if (!comparePasswords) {
       return next(404);
     }
     const token = jwt.sign({ uid: checkUser._id }, secret, { expiresIn: '3h' });
-    /* console.log('auth', checkUser);
-    console.log('auth', token); */
+   
     resp.status(200).send({ token });
-    // console.log('token(200) :)');
+ 
     next();
   });
 

@@ -36,7 +36,7 @@ const initAdminUser = async (app, next) => {
   const usersCollection = await db.collection('users');
   const checkAdmin = await usersCollection.findOne({ email: adminEmail });
   // retorna un boolean
-  // console.log('CHECKEANDO ADMIN', checkAdmin);
+
   if (!checkAdmin) {
     await usersCollection.insertOne(adminUser);
   }
@@ -72,7 +72,7 @@ const initAdminUser = async (app, next) => {
 
 /** @module users */
 module.exports = (app, next) => {
-  // console.log(app);
+
   /**
    * @name GET /users
    * @description Lista usuarias
@@ -112,13 +112,6 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  /* app.get('/users/:uid', requireAuth, requireAdmin, (_, res) => res.json({
-    _id: "5e5edfb543e4173710eaf401",
-    email: 'admin@localhost',
-    password:
-      '$2b$10$ej/dRuwGPzBnubsXYdJDQeHaqtlxcl5vtNLTPQ5H0Sks7RXOKgag2',
-    roles: { admin: true },
-  })); */
 
   app.get('/users/:uid', requireAuth, isUserOrAdmin, getUserById);
 
@@ -184,6 +177,5 @@ module.exports = (app, next) => {
    * @code {404} si la usuaria solicitada no existe
    */
   app.delete('/users/:uid', requireAuth, isUserOrAdmin, deleteUser);
-  console.log('llegue al next final');
   initAdminUser(app, next);
 };
